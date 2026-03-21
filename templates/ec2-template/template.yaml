@@ -1,0 +1,60 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: ec2-template
+  title: EC2 Instance Template
+  description: Create EC2 via Terraform
+
+spec:
+  owner: user:guest
+  type: service
+
+  parameters:
+    - title: EC2 Configuration
+      required:
+        - instance_name
+        - instance_type
+        - os_type
+
+      properties:
+        instance_name:
+          type: string
+          title: Instance Name
+
+        instance_type:
+          type: string
+          title: Instance Type
+          default: t3.micro
+
+        os_type:
+          type: string
+          title: OS
+          enum:
+            - amazonlinux2023
+            - ubuntu
+            - windowsserver2022
+
+  steps:
+    - id: fetch-base
+      name: Fetch Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          instance_name: ${{ parameters.instance_name }}
+          instance_type: ${{ parameters.instance_type }}
+          os_type: ${{ parameters.os_type }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?repo=${{ parameters.instance_name }}&owner=YOUR_GITHUB_USER
+        defaultBranch: main
+
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
