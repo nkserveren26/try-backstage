@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.instance_name }}
+  description: EC2 created by Backstage
+spec:
+  type: service
+  owner: user:guest
+  lifecycle: experimental
